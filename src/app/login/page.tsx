@@ -1,13 +1,11 @@
 "use client";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const router = useRouter();
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -23,8 +21,9 @@ export default function LoginPage() {
       });
       if (error) throw error;
       setMessage("Check your email for the magic link.");
-    } catch (err: any) {
-      setMessage(err.message || "Failed to send magic link.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to send magic link.";
+      setMessage(message);
     } finally {
       setLoading(false);
     }
