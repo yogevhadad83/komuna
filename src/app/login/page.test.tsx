@@ -10,7 +10,8 @@ describe("LoginPage", () => {
     fireEvent.change(passwordInput, { target: { value: "secret" } });
     expect(emailInput.value).toBe("user@example.com");
     expect(passwordInput.value).toBe("secret");
-    expect(screen.getByRole("heading", { name: /password first/i })).toBeInTheDocument();
+  // Updated heading copy after redesign
+  expect(screen.getByRole("heading", { name: /welcome back/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /log in/i })).toBeInTheDocument();
   });
 });

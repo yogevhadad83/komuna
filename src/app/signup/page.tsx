@@ -43,42 +43,45 @@ export default function SignupPage() {
   }
 
   return (
-    <section className="max-w-md">
-      <h1 className="text-2xl font-semibold mb-4">Create your account</h1>
-      <form onSubmit={onSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="block text-sm mb-1">Email</label>
+    <section className="max-w-md mx-auto space-y-8">
+      <div className="space-y-3 text-center">
+        <h1 className="text-gradient">Join Komuna</h1>
+        <p className="muted text-sm max-w-sm mx-auto">Create an account to start exchanging items and support with people nearby.</p>
+      </div>
+      <form onSubmit={onSubmit} className="panel p-6 md:p-8 space-y-5">
+        <div className="space-y-1.5">
+          <label htmlFor="email" className="text-xs font-medium tracking-wide uppercase text-[var(--color-fg-soft)]">Email</label>
           <input
             id="email"
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-md border px-3 py-2"
             placeholder="you@example.com"
           />
         </div>
-        <div>
-          <label htmlFor="password" className="block text-sm mb-1">Password</label>
+        <div className="space-y-1.5">
+          <label htmlFor="password" className="text-xs font-medium tracking-wide uppercase text-[var(--color-fg-soft)]">Password</label>
           <input
             id="password"
             type="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-md border px-3 py-2"
             placeholder="••••••••"
             minLength={6}
           />
         </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="rounded-md bg-blue-600 text-white px-4 py-2 text-sm disabled:opacity-50"
-        >
-          {loading ? "Creating…" : "Sign Up"}
-        </button>
-        {message && <p className="text-sm text-gray-700">{message}</p>}
+        <div className="pt-2 space-y-3">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full relative inline-flex items-center justify-center h-11 rounded-md px-6 text-[14px] font-medium bg-[var(--color-brand)] text-white shadow-sm hover:brightness-110 transition disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-brand)] ring-offset-white dark:ring-offset-transparent"
+          >
+            {loading ? "Creating…" : "Sign Up"}
+          </button>
+          {message && <p className="text-sm text-[var(--color-fg-soft)] bg-[var(--bg-soft)] dark:bg-[var(--bg-panel-alt)] px-3 py-2 rounded-md border border-[var(--color-border)]/60">{message}</p>}
+        </div>
       </form>
     </section>
   );

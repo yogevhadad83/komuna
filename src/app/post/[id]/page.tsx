@@ -65,33 +65,33 @@ export default async function PostDetailPage({ params }: Params) {
   }
 
   return (
-    <section className="space-y-4 max-w-2xl">
-      <div>
-        <h1 className="text-2xl font-semibold">{post.title}</h1>
-        <div className="mt-2 flex items-center gap-2 text-xs">
-          <span className="rounded-full bg-gray-100 px-2 py-0.5">
-            {post.kind === "item" ? "Item" : "Service"}
-          </span>
-          <span className="rounded-full bg-gray-100 px-2 py-0.5">
-            {post.intent === "offer" ? "Offer" : "Need"}
-          </span>
-          {post.location_text && (
-            <span className="text-gray-600">• {post.location_text}</span>
-          )}
+    <section className="space-y-8 max-w-3xl">
+      <div className="panel p-7 md:p-10 space-y-6">
+        <div className="space-y-4">
+          <h1 className="text-gradient leading-tight">{post.title}</h1>
+          <div className="flex flex-wrap items-center gap-2 text-[11px]">
+            <span className="badge" data-variant={post.kind}>{post.kind === "item" ? "Item" : "Service"}</span>
+            <span className="badge" data-variant={post.intent}>{post.intent === "offer" ? "Offer" : "Need"}</span>
+            {post.location_text && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--bg-soft)] dark:bg-[var(--bg-panel-alt)] text-[var(--color-fg-soft)] font-medium tracking-wide">{post.location_text}</span>
+            )}
+          </div>
         </div>
-      </div>
-      <p className="whitespace-pre-wrap text-gray-800">{post.description}</p>
-
-      <div className="pt-2">
-        <form action={expressInterest}>
-          <button
-            type="submit"
-            disabled={!!isOwner}
-            className="rounded-md bg-blue-600 text-white px-4 py-2 text-sm disabled:opacity-50"
-          >
-            {isOwner ? "You are the owner" : "Express Interest"}
-          </button>
-        </form>
+        <div className="prose prose-sm max-w-none text-[var(--color-fg)] dark:prose-invert">
+          <p className="whitespace-pre-wrap leading-relaxed text-[15px]">{post.description}</p>
+        </div>
+        <div className="pt-2">
+          <form action={expressInterest} className="flex flex-wrap items-center gap-4">
+            <button
+              type="submit"
+              disabled={!!isOwner}
+              className="relative inline-flex items-center h-11 rounded-md px-6 text-[14px] font-medium bg-[var(--color-brand)] text-white shadow-sm hover:brightness-110 transition disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-brand)] ring-offset-white dark:ring-offset-transparent"
+            >
+              {isOwner ? "You are the owner" : "Express Interest"}
+            </button>
+            {!isOwner && <p className="text-[11px] text-[var(--color-fg-soft)]">Expressing interest opens a private conversation.</p>}
+          </form>
+        </div>
       </div>
     </section>
   );

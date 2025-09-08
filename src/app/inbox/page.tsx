@@ -59,29 +59,35 @@ export default async function InboxPage() {
   });
 
   return (
-    <section className="space-y-4">
-      <h1 className="text-2xl font-semibold">Inbox</h1>
+    <section className="space-y-8 max-w-3xl">
+      <div className="space-y-3">
+        <h1 className="text-gradient">Inbox</h1>
+        <p className="muted text-sm">Your active conversations about offers and needs.</p>
+      </div>
       {rows.length === 0 ? (
-        <p className="text-sm text-gray-600">No conversations yet.</p>
+        <div className="panel p-8 text-center">
+          <p className="text-sm muted">No conversations yet. Express interest in a post to start one.</p>
+        </div>
       ) : (
-        <ul className="divide-y rounded-md border bg-white">
+        <div className="list-panel divide-y divide-[var(--color-border)]/70">
           {rows.map((r) => (
-            <li key={r.id} className="p-3 flex items-center justify-between">
-              <div>
-                <div className="font-medium">{r.title}</div>
-                {r.otherEmail && (
-                  <div className="text-xs text-gray-600">with {r.otherEmail}</div>
-                )}
+            <Link
+              key={r.id}
+              href={`/thread/${r.id}`}
+              className="block p-5 hover:bg-[var(--bg-soft)] dark:hover:bg-[var(--bg-panel-alt)] transition focus-visible:outline-none focus-visible:brand-ring"
+            >
+              <div className="flex items-start justify-between gap-6">
+                <div className="min-w-0 space-y-1">
+                  <div className="font-medium tracking-tight text-sm line-clamp-1">{r.title || "(untitled post)"}</div>
+                  {r.otherEmail && (
+                    <div className="text-[11px] text-[var(--color-fg-soft)]">with {r.otherEmail}</div>
+                  )}
+                </div>
+                <span className="text-[11px] font-medium uppercase tracking-wide text-[var(--color-brand)]">Open</span>
               </div>
-              <Link
-                className="text-sm text-blue-600 hover:underline"
-                href={`/thread/${r.id}`}
-              >
-                Open
-              </Link>
-            </li>
+            </Link>
           ))}
-        </ul>
+        </div>
       )}
     </section>
   );

@@ -68,43 +68,41 @@ export default async function ThreadPage({ params }: Params) {
   }
 
   return (
-    <section className="space-y-4 max-w-2xl">
-      <div>
-        <h1 className="text-2xl font-semibold">Conversation</h1>
-        {postTitle && (
-          <p className="text-sm text-gray-600">Post: {postTitle}</p>
-        )}
-        {otherEmail && (
-          <p className="text-sm text-gray-600">With: {otherEmail}</p>
-        )}
+    <section className="space-y-8 max-w-3xl">
+      <div className="space-y-2">
+        <h1 className="text-gradient">Conversation</h1>
+        <div className="flex flex-wrap items-center gap-4 text-[11px] text-[var(--color-fg-soft)]">
+          {postTitle && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--bg-soft)] dark:bg-[var(--bg-panel-alt)]">Post: {postTitle}</span>}
+          {otherEmail && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--bg-soft)] dark:bg-[var(--bg-panel-alt)]">With: {otherEmail}</span>}
+        </div>
       </div>
-      <div className="rounded-md border bg-white p-4 space-y-3">
+      <div className="panel p-5 md:p-7 space-y-4 max-h-[60vh] overflow-y-auto">
         {(messages ?? []).length === 0 ? (
-          <p className="text-sm text-gray-600">No messages yet.</p>
+          <p className="text-sm muted">No messages yet. Start the conversation.</p>
         ) : (
-          <ul className="space-y-2">
-            {(messages ?? []).map((m) => (
-              <li key={m.id} className={`flex ${m.sender_id === user.id ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[80%] rounded-md px-3 py-2 text-sm ${m.sender_id === user.id ? "bg-blue-600 text-white" : "bg-gray-100"}`}>
-                  <div>{m.body}</div>
-                  <div className="mt-1 text-[10px] opacity-70">{new Date(m.created_at as unknown as string).toLocaleString()}</div>
-                </div>
-              </li>
-            ))}
+          <ul className="space-y-3">
+            {(messages ?? []).map((m) => {
+              const mine = m.sender_id === user.id;
+              return (
+                <li key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+                  <div className={`max-w-[78%] rounded-2xl px-4 py-2.5 text-[13px] leading-relaxed shadow-sm ${mine ? "bubble-own" : "bubble-other"}`}>
+                    <div>{m.body}</div>
+                    <div className={`mt-1 text-[10px] opacity-70 ${mine ? "text-white" : "text-[var(--color-fg-soft)]"}`}>{new Date(m.created_at as unknown as string).toLocaleTimeString()}</div>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
-
-      <form action={sendMessage} className="flex items-center gap-2">
+      <form action={sendMessage} className="flex items-center gap-3">
         <input
           type="text"
           name="body"
-          placeholder="Type a message"
-          className="flex-1 rounded-md border px-3 py-2"
+          placeholder="Type a message to continue the exchange"
+          className="flex-1"
         />
-        <button type="submit" className="rounded-md bg-blue-600 text-white px-4 py-2 text-sm">
-          Send
-        </button>
+        <button type="submit" className="relative inline-flex items-center h-11 rounded-md px-6 text-[13px] font-medium bg-[var(--color-brand)] text-white shadow-sm hover:brightness-110 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-brand)] ring-offset-white dark:ring-offset-transparent">Send</button>
       </form>
     </section>
   );

@@ -5,8 +5,11 @@ import { createClient } from "@/lib/supabase/server";
 
 export default function NewPostPage() {
   return (
-    <section className="space-y-6">
-      <h1 className="text-2xl font-semibold">Create Post</h1>
+    <section className="space-y-8">
+      <div className="space-y-3 max-w-2xl">
+        <h1 className="text-gradient">Create a Post</h1>
+        <p className="muted text-sm leading-relaxed">Offer something useful or ask for support. Clear, kind posts foster trust and faster responses.</p>
+      </div>
       <PostForm onSubmitAction={createPost} />
     </section>
   );
