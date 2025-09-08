@@ -46,7 +46,20 @@ export default async function PostDetailPage({ params }: Params) {
       )
       .select("id")
       .single();
-    if (upsertErr) throw upsertErr;
+    if (upsertErr) {
+      // If unique violation, try to fetch the existing row
+      const { data: existing } = await supabase
+        .from("message_thread")
+        .select("id")
+        .eq("post_id", postData.id)
+        .eq("owner_id", postData.owner_id)
+        .eq("participant_id", user.id)
+        .single();
+      if (existing?.id) {
+        redirect(`/thread/${existing.id}`);
+      }
+      throw upsertErr;
+    }
 
   redirect(`/thread/${thread.id}`);
   }

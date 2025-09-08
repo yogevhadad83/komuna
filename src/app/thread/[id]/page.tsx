@@ -12,33 +12,37 @@ export default async function ThreadPage({ params }: Params) {
   } = await supabase.auth.getUser();
   if (userErr || !user) throw new Error("Not authenticated");
 
+  // Fetch the base thread row first (no joins to avoid constraint-name coupling)
   const { data: thread, error: threadErr } = await supabase
     .from("message_thread")
-    .select(
-      `id, post_id, owner_id, participant_id,
-       post:post!inner(id, title),
-       owner:profiles!message_thread_owner_id_fkey(email),
-       participant:profiles!message_thread_participant_id_fkey(email)`
-    )
-  .eq("id", id)
+    .select("id, post_id, owner_id, participant_id")
+    .eq("id", id)
     .single();
   if (threadErr || !thread) throw threadErr || new Error("Thread not found");
 
-  // Normalize join shapes that may be arrays depending on inferred cardinality
-  type Profile = { email: string | null };
-  type PostSummary = { id: string; title: string };
-  type ThreadJoined = typeof thread & {
-    post: PostSummary | PostSummary[] | null;
-    owner: Profile | Profile[] | null;
-    participant: Profile | Profile[] | null;
-  };
-  const normalizeJoin = <T,>(v: T | T[] | null | undefined): T | null =>
-    Array.isArray(v) ? v[0] ?? null : v ?? null;
-  const t = thread as ThreadJoined;
-  const postObj = normalizeJoin<PostSummary>(t.post);
-  const ownerObj = normalizeJoin<Profile>(t.owner);
-  const participantObj = normalizeJoin<Profile>(t.participant);
-  const otherEmail = thread.owner_id === user.id ? participantObj?.email ?? null : ownerObj?.email ?? null;
+  // Best-effort lookups for post title and other participant email; ignore failures
+  let postTitle: string | null = null;
+  try {
+    const { data } = await supabase
+      .from("post")
+      .select("id, title")
+      .eq("id", thread.post_id)
+      .single();
+    postTitle = data?.title ?? null;
+  } catch {}
+
+  let otherEmail: string | null = null;
+  const otherUserId = thread.owner_id === user.id ? thread.participant_id : thread.owner_id;
+  if (otherUserId) {
+    try {
+      const { data } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("id", otherUserId)
+        .single();
+      otherEmail = (data as { email?: string } | null)?.email ?? null;
+    } catch {}
+  }
 
   const { data: messages, error: msgErr } = await supabase
     .from("message")
@@ -67,7 +71,9 @@ export default async function ThreadPage({ params }: Params) {
     <section className="space-y-4 max-w-2xl">
       <div>
         <h1 className="text-2xl font-semibold">Conversation</h1>
-  <p className="text-sm text-gray-600">Post: {postObj?.title}</p>
+        {postTitle && (
+          <p className="text-sm text-gray-600">Post: {postTitle}</p>
+        )}
         {otherEmail && (
           <p className="text-sm text-gray-600">With: {otherEmail}</p>
         )}

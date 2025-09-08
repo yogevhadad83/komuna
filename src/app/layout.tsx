@@ -30,7 +30,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   </form>
                 </>
               ) : (
-                <Link href="/login">Login</Link>
+                <>
+                  <Link href="/login">Login</Link>
+                  <Link href="/signup" className="rounded-md border px-2 py-1 hover:bg-gray-50">Sign Up</Link>
+                </>
               )}
             </nav>
           </div>

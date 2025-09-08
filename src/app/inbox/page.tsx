@@ -9,44 +9,52 @@ export default async function InboxPage() {
   } = await supabase.auth.getUser();
   if (userErr || !user) throw new Error("Not authenticated");
 
-  // We need threads where user is owner or participant; then compute the other party's email
+  // 1) Fetch relevant threads without joins
   const { data: threads, error } = await supabase
     .from("message_thread")
-    .select(
-      `id, post_id, owner_id, participant_id,
-       post:post!inner(id, title),
-       owner:profiles!message_thread_owner_id_fkey(email),
-       participant:profiles!message_thread_participant_id_fkey(email)`
-    )
+    .select("id, post_id, owner_id, participant_id")
     .or(`owner_id.eq.${user.id},participant_id.eq.${user.id}`)
     .order("id", { ascending: false });
   if (error) throw error;
 
-  type Profile = { email: string | null };
-  type PostSummary = { id: string; title: string };
-  type ThreadJoined = {
-    id: string;
-    post_id: string;
-    owner_id: string;
-    participant_id: string;
-    post: PostSummary | PostSummary[] | null;
-    owner: Profile | Profile[] | null;
-    participant: Profile | Profile[] | null;
-  };
+  const postIds = new Set<string>();
+  const otherUserIds = new Set<string>();
+  for (const t of threads ?? []) {
+    if (t.post_id) postIds.add(t.post_id as string);
+    const other = t.owner_id === user.id ? (t.participant_id as string) : (t.owner_id as string);
+    if (other) otherUserIds.add(other);
+  }
 
-  const normalizeJoin = <T,>(v: T | T[] | null | undefined): T | null =>
-    Array.isArray(v) ? v[0] ?? null : v ?? null;
+  // 2) Fetch posts and profiles in bulk (best-effort; ignore errors and fill blanks)
+  const postsMap = new Map<string, string>();
+  if (postIds.size) {
+    try {
+      const { data } = await supabase
+        .from("post")
+        .select("id, title")
+        .in("id", Array.from(postIds));
+      for (const p of data ?? []) postsMap.set(p.id as string, (p.title as string) ?? "");
+    } catch {}
+  }
 
-  const rows = ((threads ?? []) as ThreadJoined[]).map((t) => {
-    const ownerObj = normalizeJoin<Profile>(t.owner);
-    const participantObj = normalizeJoin<Profile>(t.participant);
-    const postObj = normalizeJoin<PostSummary>(t.post);
-    const otherEmail = t.owner_id === user.id ? participantObj?.email ?? null : ownerObj?.email ?? null;
+  const profilesMap = new Map<string, string | null>();
+  if (otherUserIds.size) {
+    try {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, email")
+        .in("id", Array.from(otherUserIds));
+      for (const pr of data ?? []) profilesMap.set(pr.id as string, (pr.email as string) ?? null);
+    } catch {}
+  }
+
+  const rows = (threads ?? []).map((t) => {
+    const other = t.owner_id === user.id ? (t.participant_id as string) : (t.owner_id as string);
     return {
-      id: t.id,
-      post_id: t.post_id,
-      title: postObj?.title ?? "",
-      otherEmail,
+      id: t.id as string,
+      post_id: t.post_id as string,
+      title: postsMap.get(t.post_id as string) ?? "",
+      otherEmail: other ? profilesMap.get(other) ?? null : null,
     };
   });
 
